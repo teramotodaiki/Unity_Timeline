@@ -71,24 +71,6 @@ public partial class Timeline
     /// 戻り値がvoidの関数、またはデリゲートを呼び出します。
     /// </summary>
     /// <param name="routine">関数またはデリゲート</param>
-    /// <returns>メソッドチェイン</returns>
-    public Timeline Then(Action routine){
-        // キューのメモリ確保
-        if (this.routines == null)
-            this.routines = new Queue<DoWhile>();
-        // 新しいルーチンをエンキュー
-        this.routines.Enqueue(new DoWhile { Do = t => routine(), While = 0 });
-        // ルーチンがひとつも実行されていなければ、デキューしてコール
-        if (this.beginFlag == false)
-            this.DequeueToCall();
-        // メソッドチェイン
-        return this;
-    }
-
-    /// <summary>
-    /// 戻り値がvoidの関数、またはデリゲートを呼び出します。
-    /// </summary>
-    /// <param name="routine">経過時間(float)を引数に持つ関数またはデリゲート</param>
     /// <param name="time">呼び出す時間</param>
     /// <returns>メソッドチェイン</returns>
     public Timeline Then(Action<float> routine, float time = 0)
