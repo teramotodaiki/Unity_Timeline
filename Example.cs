@@ -8,6 +8,17 @@ public class Example : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+        
+        // Move object
         this.tl().MoveBy(Vector3.right*5, 0.5f).Delay(1f).MoveTo(new Vector3(0, 5, 0), 2f);
+
+        // Call method
+        this.tl().Delay(1f).Then(Example);
+
 	}
+
+    void Example()
+    {
+        Debug.Log("called");
+    }
 }
