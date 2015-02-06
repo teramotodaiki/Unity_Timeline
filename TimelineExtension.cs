@@ -33,7 +33,7 @@ static class TimelineExtension
     /// </summary>
     /// <param name="target">処理の対象</param>
     /// <returns>メソッドチェインの始点</returns>
-    public static Timeline tl(this MonoBehaviour target)
+    public static Timeline tl(this Component target)
     {
         return new Timeline(target.gameObject);
     }
@@ -45,11 +45,14 @@ static class TimelineExtension
 /// </summary>
 public partial class Timeline
 {
+    /// <summary>
+    /// Timelineメソッドを実行する母体を提供するビヘイビア
+    /// </summary>
+    public static MonoBehaviour TimelineProvider { get; private set; }
 
     private GameObject target;
     private bool beginFlag;
 
-    private MonoBehaviour component;
     private Queue<DoWhile> routines;
     struct DoWhile
     {
@@ -63,8 +66,16 @@ public partial class Timeline
     /// <param name="gameObject">処理の対象</param>
     public Timeline(GameObject gameObject)
     {
-        this.target = gameObject;
-        this.beginFlag = false;
+        this.target = gameObject; // 処理対象のgameObject
+        this.beginFlag = false; // ルーチン実行フラグ
+        this.routines = new Queue<DoWhile>(); // キューのメモリ確保
+
+        // プロバイダの用意
+        if (TimelineProvider == null)
+        {
+            var provider = new GameObject("Timeline Provider");
+            TimelineProvider = provider.AddComponent<MonoBehaviour>(); // 実体はMonoBehaviour
+        }
     }
 
     /// <summary>
@@ -75,9 +86,6 @@ public partial class Timeline
     /// <returns>メソッドチェイン</returns>
     public Timeline Then(Action<float> routine, float time = 0)
     {
-        // キューのメモリ確保
-        if (this.routines == null)
-            this.routines = new Queue<DoWhile>();
         // 新しいルーチンをエンキュー
         this.routines.Enqueue(new DoWhile { Do = routine, While = time });
         // ルーチンがひとつも実行されていなければ、デキューしてコール
@@ -93,19 +101,12 @@ public partial class Timeline
         {
             // デキュー
             DoWhile dw = this.routines.Dequeue();
-            // （なければ）新しいコンポーネントを用意
-            if (this.component == null)
-                this.component = this.target.AddComponent<MonoBehaviour>();
             // 新しいコルーチンを開始
-            this.component.StartCoroutine(one_routine(dw.Do, dw.While));
+            TimelineProvider.StartCoroutine(one_routine(dw.Do, dw.While));
             this.beginFlag = true;
         }
         else
-        {
-            // 破棄
-            GameObject.Destroy(this.component);
-            this.routines = null;
-        }
+            this.routines = null; // キューの破棄
     }
 
     /// <summary>
@@ -119,10 +120,11 @@ public partial class Timeline
         float spend = 0;
         while (true)
         {
+            spend = Mathf.Min(spend + Time.deltaTime, time); // 時間経過
             action(spend);
-            if ((spend += Time.deltaTime) >= time)
-                break;
             yield return null;
+            if (spend >= time)
+                break;
         }
         // 次のルーチンを呼び出す
         this.DequeueToCall();
