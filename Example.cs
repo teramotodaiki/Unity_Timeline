@@ -9,16 +9,16 @@ public class Example : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         
-        // Move object
-        this.tl().MoveBy(Vector3.right*5, 0.5f).Delay(1f).MoveTo(new Vector3(0, 5, 0), 2f);
+        // Move object (5,0,0) -> stop -> (0,5,0)
+        this.tl().MoveBy(Vector3.right * 5, 0.5f).Delay(1f).MoveTo(new Vector3(0, 5, 0), 2f);
 
-        // Call method
-        this.tl().Delay(1f).Then(Hoge);
+        // Call method (Debug.Log 0, 0.001, 0.002, ... 1.0)
+        this.tl().Then(LogTime, 1f);
 
 	}
 
-    void Hoge()
+    void LogTime(float time)
     {
-        Debug.Log("called");
+        Debug.Log(time + " seconds spend.");
     }
 }
