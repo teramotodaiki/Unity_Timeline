@@ -45,4 +45,36 @@ public partial class Timeline
         return this.Then(t => this.target.transform.position += by * Time.deltaTime, time);
     }
 
+    /// <summary>
+    /// オブジェクトを破棄します。
+    /// </summary>
+    /// <returns></returns>
+    public Timeline Destroy()
+    {
+        return this.Then(t => GameObject.Destroy(this.target)); // 破棄
+    }
+
+    /// <summary>
+    /// SpriteRendererをもつオブジェクトにのみ使用できます。Spriteのカラーをアニメーションで変更します。
+    /// </summary>
+    /// <param name="color"></param>
+    /// <returns></returns>
+    public Timeline SpriteColor(Color color, float time)
+    {
+        var render = this.target.GetComponent<SpriteRenderer>();
+        var from = render.color;
+        return this.Then(t => render.color = Color.Lerp(from, color, time > 0 ? t / time : 1), time);
+    }
+
+    /// <summary>
+    /// SpriteRendererをもつオブジェクトにのみ使用できます。Spriteを変更します
+    /// </summary>
+    /// <param name="sprite"></param>
+    /// <returns></returns>
+    public Timeline Sprite(Sprite sprite)
+    {
+        var render = this.target.GetComponent<SpriteRenderer>();
+        return this.Then(t => render.sprite = sprite); // スプライトを変更
+    }
+
 }
